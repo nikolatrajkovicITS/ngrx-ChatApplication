@@ -16,19 +16,20 @@ export class ThreadSectionComponent implements OnInit {
               private store: Store<ApplicationState>) {
 
                 store.subscribe(
-                  console.log
+                  state => console.log('thread section received state', state)
                 )
 
   }
 
   ngOnInit() {
-    this.threadsService.loadUserThreads()
-        .subscribe(
-          allUserData => this.store.dispatch(
-            new LoadUserThreadAction(allUserData)
-          )
-        );
-
+  
+  
+    // this.threadsService.loadUserThreads()
+    //     .subscribe(
+    //       allUserData => this.store.dispatch(
+    //         new LoadUserThreadAction(allUserData)
+    //       )
+    //     );
   }
 
 }

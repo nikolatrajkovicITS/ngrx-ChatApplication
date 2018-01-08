@@ -11,3 +11,9 @@ export interface StoreData {
 
     messages: {[key:number]: Message};    // we are going to store our messages per message id
 }
+
+export const INITIAL_STORE_DATA: StoreData = {
+    threads: {},
+    messages: {},
+    participants: {}
+};
