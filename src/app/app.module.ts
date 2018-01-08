@@ -13,14 +13,17 @@ import { MessageListComponent } from './message-list/message-list.component';
 import { ThreadsService } from "./services/threads.service";
 import { ApplicationState, INITIAL_APPLICATION_STATE } from 'app/store/application-state';
 import { LOAD_USER_THREADS_ACTION, LoadUserThreadAction } from './store/actions';
+import * as _ from 'lodash';
 
-function storeReducer(state: ApplicationState, action: Action): ApplicationState {
-  switch (action.type) {
-    case LOAD_USER_THREADS_ACTION:
-      return handleLoadUserThreadsAction(state, action);
-    default:
-      return state;
-  }
+function storeReducer(
+  state: ApplicationState = INITIAL_APPLICATION_STATE, 
+  action: Action): ApplicationState {
+    switch (action.type) {
+      case LOAD_USER_THREADS_ACTION:
+        return handleLoadUserThreadsAction(state, action);
+      default:
+        return state;
+    }
   
 }
 
@@ -31,7 +34,7 @@ function handleLoadUserThreadsAction(state: ApplicationState, action: LoadUserTh
   newState.storeData = {
       participants: _.keyBy(action.payload.participants, 'id'),
       messages: _.keyBy(action.payload.messages, 'id'),
-      threads: _.keyBy(action.payload.threads, 'id'),   
+      threads: _.keyBy(action.payload.threads, 'id')
   };
   
   return newState;
@@ -50,7 +53,7 @@ function handleLoadUserThreadsAction(state: ApplicationState, action: LoadUserTh
     BrowserModule,
     FormsModule,
     HttpModule,
-    StoreModule.forRoot(storeReducer, INITIAL_APPLICATION_STATE)
+    StoreModule.forRoot(storeReducer)
   ],
   providers: [ThreadsService],
   bootstrap: [AppComponent]
