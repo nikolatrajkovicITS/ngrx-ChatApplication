@@ -1,3 +1,4 @@
+import { StoreModule } from '@ngrx/store';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { ThreadSectionComponent } from './thread-section/thread-section.componen
 import { MessageSectionComponent } from './message-section/message-section.component';
 import { ThreadListComponent } from './thread-list/thread-list.component';
 import { MessageListComponent } from './message-list/message-list.component';
-import {ThreadsService} from "./services/threads.service";
+import { ThreadsService } from "./services/threads.service";
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import {ThreadsService} from "./services/threads.service";
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    StoreModule.forRoot({})
   ],
   providers: [ThreadsService],
   bootstrap: [AppComponent]
