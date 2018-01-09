@@ -5,6 +5,9 @@ import { ApplicationState } from '../store/application-state';
 import { Thread } from '../../../shared/model/thread';
 import { LoadUserThreadAction } from '../store/actions';
 import { Observable } from 'rxjs';
+import * as _ from 'lodash';
+import { ThreadSummaryVM } from './thread-summary.vm';
+import { mapStateToUsername } from './mapStateToUsername';
 
 @Component({
   selector: 'thread-section',
@@ -14,25 +17,41 @@ import { Observable } from 'rxjs';
 export class ThreadSectionComponent implements OnInit {
   username$: Observable<string>;
   unreadMessageCounter$: Observable<number>;
+  threadSummaries$: Observable<ThreadSummaryVM[]>;
 
   constructor(private threadsService: ThreadsService,
               private store: Store<ApplicationState>) {
       this.username$ = store
           .skip(1)
-          .map(this.mapStateToUsername);
-
+          .map(mapStateToUsername);
       this.unreadMessageCounter$ = store.skip(1)
-                                        .map(this.mapStateToUndreadMessagesCounter);
+          .map(this.mapStateToUndreadMessagesCounter);
 
-  }
+      this.threadSummaries$ = store.select(
+          state => {
+            const threads = _.values<Thread>(state.storeData.threads);
 
-  mapStateToUsername(state: ApplicationState): string {
-     return state.storeData.participants[state.uiState.userId].name;
+            return threads.map(thread => {
+              const names = _.keys(thread.participants).map(
+                  participantId => state.storeData.participants[participantId].name);
+               
+              const lastMessageId = _.last(thread.messageIds),
+                    lastMessage = state.storeData.messages[lastMessageId];
+
+              return {
+                id: thread.id,
+                paricipantNames: _.join(names, ","),
+                lastMessageText: state.storeData.messages[lastMessageId].text,
+                timestamp: lastMessage.timestamp
+              }
+            });
+          }
+      );
   }
 
   mapStateToUndreadMessagesCounter(state: ApplicationState): number {
-    const currentUserId = state.uiState.currentThreadId;  // current user
-   
+    const currentUserId = state.uiState.userId;  // current user
+
     return _.values<Thread>(state.storeData.threads)
         .reduce(
           (acc, thread)  => acc + thread.participants[currentUserId]
@@ -40,14 +59,12 @@ export class ThreadSectionComponent implements OnInit {
   }
 
   ngOnInit() {
-  
-  
-    // this.threadsService.loadUserThreads()
-    //     .subscribe(
-    //       allUserData => this.store.dispatch(
-    //         new LoadUserThreadAction(allUserData)
-    //       )
-    //     );
+    this.threadsService.loadUserThreads()
+        .subscribe(
+            allUserData => this.store.dispatch(
+              new LoadUserThreadAction(allUserData)
+            )
+        );
   }
 
 }
