@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 import { ThreadSummaryVM } from './thread-summary.vm';
 import { mapStateToUsername } from './mapStateToUsername';
+import { stateToThreadSummariesSelector } from './stateToThreadSummariesSelector';
 
 @Component({
   selector: 'thread-section',
@@ -20,51 +21,32 @@ export class ThreadSectionComponent implements OnInit {
   threadSummaries$: Observable<ThreadSummaryVM[]>;
 
   constructor(private threadsService: ThreadsService,
-              private store: Store<ApplicationState>) {
-      this.username$ = store
-          .skip(1)
-          .map(mapStateToUsername);
-      this.unreadMessageCounter$ = store.skip(1)
-          .map(this.mapStateToUndreadMessagesCounter);
+    private store: Store<ApplicationState>) {
+    this.username$ = store.select(usernameSelector);
 
-      this.threadSummaries$ = store.select(
-          state => {
-            const threads = _.values<Thread>(state.storeData.threads);
+    this.unreadMessageCounter$ = store
+      .skip(1)
+      .map(this.mapStateToUndreadMessagesCounter);
 
-            return threads.map(thread => {
-              const names = _.keys(thread.participants).map(
-                  participantId => state.storeData.participants[participantId].name);
-               
-              const lastMessageId = _.last(thread.messageIds),
-                    lastMessage = state.storeData.messages[lastMessageId];
-
-              return {
-                id: thread.id,
-                paricipantNames: _.join(names, ","),
-                lastMessageText: state.storeData.messages[lastMessageId].text,
-                timestamp: lastMessage.timestamp
-              }
-            });
-          }
-      );
+    this.threadSummaries$ = store.select(stateToThreadSummariesSelector);
   }
 
   mapStateToUndreadMessagesCounter(state: ApplicationState): number {
     const currentUserId = state.uiState.userId;  // current user
 
     return _.values<Thread>(state.storeData.threads)
-        .reduce(
-          (acc, thread)  => acc + thread.participants[currentUserId]
-          , 0);
+      .reduce(
+      (acc, thread) => acc + thread.participants[currentUserId]
+      , 0);
   }
 
   ngOnInit() {
     this.threadsService.loadUserThreads()
-        .subscribe(
-            allUserData => this.store.dispatch(
-              new LoadUserThreadAction(allUserData)
-            )
-        );
+      .subscribe(
+      allUserData => this.store.dispatch(
+        new LoadUserThreadAction(allUserData)
+      )
+      );
   }
 
 }
