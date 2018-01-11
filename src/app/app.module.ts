@@ -1,3 +1,4 @@
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { StoreModule, Action } from '@ngrx/store';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -12,14 +13,16 @@ import { ThreadListComponent } from './thread-list/thread-list.component';
 import { MessageListComponent } from './message-list/message-list.component';
 import { ThreadsService } from "./services/threads.service";
 import { ApplicationState, INITIAL_APPLICATION_STATE } from 'app/store/application-state';
-import { LOAD_USER_THREADS_ACTION, LoadUserThreadAction } from './store/actions';
+import { USER_THREADS_LOADED_ACTION, UserThreadsLoadedAction } from './store/actions';
 import * as _ from 'lodash';
+import { EffectsModule } from '@ngrx/effects/src/effects_module';
+import { LoadThreadsEffectService } from 'app/store/effects/load-threads-effect.service';
 
 function storeReducer(
   state: ApplicationState = INITIAL_APPLICATION_STATE, 
   action: Action): ApplicationState {
     switch (action.type) {
-      case LOAD_USER_THREADS_ACTION:
+      case USER_THREADS_LOADED_ACTION:
         return handleLoadUserThreadsAction(state, action);
       default:
         return state;
@@ -27,7 +30,7 @@ function storeReducer(
   
 }
 
-function handleLoadUserThreadsAction(state: ApplicationState, action: LoadUserThreadAction): ApplicationState {
+function handleLoadUserThreadsAction(state: ApplicationState, action: UserThreadsLoadedAction): ApplicationState {
   action.payload;
   const UserData = action.payload; 
   const newState: ApplicationState = Object.assign({}, state);
@@ -47,15 +50,20 @@ function handleLoadUserThreadsAction(state: ApplicationState, action: LoadUserTh
     ThreadSectionComponent,
     MessageSectionComponent,
     ThreadListComponent,
-    MessageListComponent
+    MessageListComponent,
+    
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
-    StoreModule.forRoot(storeReducer)
+    EffectsModule.forRoot([LoadThreadsEffectService]),
+    StoreModule.forRoot(storeReducer),
+    StoreDevtoolsModule.instrument()
   ],
-  providers: [ThreadsService],
+  providers: [
+    ThreadsService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -8,7 +8,6 @@ export class ThreadsService {
 
    constructor(private http: Http) { }
 
-
     loadUserThreads(): Observable<AllUserData> {
         return this.http.get('/api/threads')
             .map(res => res.json());

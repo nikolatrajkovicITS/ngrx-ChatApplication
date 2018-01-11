@@ -8,5 +8,5 @@ import { ApplicationState } from '../store/application-state';
          return "";
      }
 
-    return scurrentParticipant.name;
+    return currentParticipant.name;
  }
