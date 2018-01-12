@@ -17,31 +17,12 @@ import { USER_THREADS_LOADED_ACTION, UserThreadsLoadedAction } from './store/act
 import * as _ from 'lodash';
 import { EffectsModule } from '@ngrx/effects/src/effects_module';
 import { LoadThreadsEffectService } from 'app/store/effects/load-threads-effect.service';
-
-function storeReducer(
-  state: ApplicationState = INITIAL_APPLICATION_STATE, 
-  action: Action): ApplicationState {
-    switch (action.type) {
-      case USER_THREADS_LOADED_ACTION:
-        return handleLoadUserThreadsAction(state, action);
-      default:
-        return state;
-    }
-  
-}
-
-function handleLoadUserThreadsAction(state: ApplicationState, action: UserThreadsLoadedAction): ApplicationState {
-  action.payload;
-  const UserData = action.payload; 
-  const newState: ApplicationState = Object.assign({}, state);
-  newState.storeData = {
-      participants: _.keyBy(action.payload.participants, 'id'),
-      messages: _.keyBy(action.payload.messages, 'id'),
-      threads: _.keyBy(action.payload.threads, 'id')
-  };
-  
-  return newState;
-}
+import { UiState } from 'app/store/ui-state';
+import { INITIAL_UI_STATE } from './store/ui-state';
+import { StoreData } from 'app/store/store-data';
+import { uiState } from './store/reducers/uiStateReducer';
+import { storeData } from './store/reducers/uiStoreDataReducer';
+import { combineReducers } from '@ngrx/store/src/utils';
 
 @NgModule({
   declarations: [
@@ -58,7 +39,7 @@ function handleLoadUserThreadsAction(state: ApplicationState, action: UserThread
     FormsModule,
     HttpModule,
     EffectsModule.forRoot([LoadThreadsEffectService]),
-    StoreModule.forRoot(storeReducer),
+    StoreModule.forRoot(combineReducers({uiState, storeData}), INITIAL_APPLICATION_STATE),
     StoreDevtoolsModule.instrument()
   ],
   providers: [

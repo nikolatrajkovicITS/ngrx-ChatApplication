@@ -3,12 +3,13 @@ import { ThreadsService } from "../services/threads.service";
 import { Store } from '@ngrx/store';
 import { ApplicationState } from '../store/application-state';
 import { Thread } from '../../../shared/model/thread';
-import { UserThreadsLoadedAction, LoadUserThreadsAction } from '../store/actions';
+import { UserThreadsLoadedAction, LoadUserThreadsAction, ThreadSelectedAction } from '../store/actions';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 import { ThreadSummaryVM } from './thread-summary.vm';
 import { stateToThreadSummariesSelector } from './stateToThreadSummariesSelector';
 import { usernameSelector } from './usernameSelector';
+import { mapStateToUnreadMessagesCounter } from './mapStateToUnreadMessagesCounter';
 
 @Component({
   selector: 'thread-section',
@@ -22,9 +23,7 @@ export class ThreadSectionComponent implements OnInit {
 
   constructor(private store: Store<ApplicationState>) {
     this.username$ = store.select(usernameSelector);
-
     this.unreadMessageCounter$ = store.skip(1).map(mapStateToUnreadMessagesCounter);
-
     this.threadSummaries$ = store.select(stateToThreadSummariesSelector);
   }
 
@@ -39,7 +38,10 @@ export class ThreadSectionComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(new LoadUserThreadsAction());
-   
+  }
+
+  onThreadSelected(selectedThreadId:number) {
+    this.store.dispatch(new ThreadSelectedAction(selectedThreadId));
   }
 
 }
